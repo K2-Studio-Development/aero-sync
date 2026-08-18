@@ -1,0 +1,68 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+    id 'org.jetbrains.kotlin.jvm' version "${kotlin_version}"
+}
+
+version = project.mod_version
+group = project.maven_group
+
+def minecraftVersion = project.minecraft_version.toString()
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java.srcDirs = ['../../src/main/java', 'src/main/java']
+        java.srcDir "src/versions/${minecraftVersion}/java"
+        kotlin.srcDirs = ['../../src/main/kotlin', 'src/main/kotlin']
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    implementation include("computer.iroh:iroh:${project.iroh_version}")
+    implementation include("org.jetbrains.kotlin:kotlin-stdlib:${project.kotlin_version}")
+    implementation include("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:${project.kotlin_coroutines_version}")
+    implementation include("net.java.dev.jna:jna:${project.jna_version}")
+}
+
+processResources {
+    inputs.property 'version', project.version
+    inputs.property 'minecraft_version', minecraftVersion
+
+    filesMatching('fabric.mod.json') {
+        expand(
+                'version': project.version,
+                'minecraft_version': minecraftVersion
+        )
+    }
+
+    from('../../src/main/resources/assets') {
+        into 'assets'
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    source(sourceSets.main.java)
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
+    }
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}

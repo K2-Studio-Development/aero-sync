@@ -1,0 +1,14 @@
+.gradle/
+.kotlin/
+build/
+run/
+out/
+.idea/
+*.iml
+*.log
+*.mp4
+gradle-8.10/
+.compat/
+releases/
+versions/neoforge-smoke/
+versions/smoke-*/

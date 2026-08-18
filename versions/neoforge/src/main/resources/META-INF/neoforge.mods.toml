@@ -1,0 +1,28 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="aerosync"
+version="${version}"
+displayName="AeroSync"
+displayTest="IGNORE_ALL_VERSION"
+authors="StandoffKitty75, K2 Studio"
+description='''Share Minecraft worlds, configs, resource packs and other selected game data through a single P2P address.'''
+
+[[dependencies.aerosync]]
+modId="neoforge"
+type="required"
+versionRange="[21.1,)"
+ordering="NONE"
+side="CLIENT"
+
+[[dependencies.aerosync]]
+modId="minecraft"
+type="required"
+versionRange="[${minecraft_version}]"
+ordering="NONE"
+side="CLIENT"
+
+[[mixins]]
+config="aerosync.neoforge.mixins.json"

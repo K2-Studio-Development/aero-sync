@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "aerosync",
+  "version": "${version}",
+  "name": "AeroSync",
+  "description": "Share Minecraft worlds, configs, resource packs and other selected game data through a single P2P address.",
+  "authors": [
+    "StandoffKitty75",
+    "K2 Studio"
+  ],
+  "contact": {},
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.aerosync.AeroSyncClientMod"
+    ]
+  },
+  "mixins": [
+    "aerosync.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}",
+    "java": ">=${java_version}"
+  }
+}

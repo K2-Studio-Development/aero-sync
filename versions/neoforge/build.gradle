@@ -1,0 +1,101 @@
+plugins {
+    id 'net.neoforged.moddev' version '2.0.144'
+    id 'org.jetbrains.kotlin.jvm' version '2.3.21'
+}
+
+version = project.mod_version
+group = project.maven_group
+layout.buildDirectory = file("../../.compat/neoforge-build/${project.minecraft_version}")
+
+base {
+    archivesName = "aerosync-neoforge-mc${project.minecraft_version}"
+}
+
+def modernMinecraft = project.minecraft_version.toString().startsWith('26.')
+def platformJava = files(fileTree('src/main/java') {
+    if (modernMinecraft) {
+        exclude 'com/aerosync/gui/**'
+        exclude 'com/aerosync/util/**'
+        exclude 'com/aerosync/neoforge/AeroScreenHooks.java'
+    }
+})
+if (modernMinecraft) {
+    platformJava += files(fileTree('../26.2/src/main/java') {
+        include 'com/aerosync/gui/**'
+        include 'com/aerosync/util/**'
+    })
+    platformJava += files(fileTree("../26.2/src/versions/${project.minecraft_version}/java"))
+    platformJava += files(fileTree('src/modern/java'))
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.fabricmc.net/' }
+}
+
+sourceSets {
+    main {
+        java.srcDirs = ['../../src/main/java']
+        kotlin.srcDirs = ['../../src/main/kotlin']
+    }
+}
+
+neoForge {
+    version = project.neoforge_version
+
+    runs {
+        client {
+            client()
+            gameDirectory = file("../../.compat/neoforge-${project.minecraft_version}-run")
+        }
+    }
+
+    mods {
+        aerosync {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+dependencies {
+    compileOnly "net.fabricmc:fabric-loader:0.18.4"
+    implementation("computer.iroh:iroh:${project.iroh_version}") {
+        exclude group: 'net.java.dev.jna', module: 'jna'
+    }
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:${project.kotlin_version}"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:${project.kotlin_coroutines_version}"
+}
+
+processResources {
+    inputs.property 'version', project.version
+    inputs.property 'minecraft_version', project.minecraft_version
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand(version: project.version, minecraft_version: project.minecraft_version)
+    }
+    from('../../src/main/resources/assets') {
+        into 'assets'
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = Integer.parseInt(project.java_version.toString())
+}
+
+tasks.named('compileJava', JavaCompile) {
+    source(platformJava)
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(project.java_version.toString())
+    }
+}
+
+tasks.named('compileKotlin', org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+    source(sourceSets.main.java, platformJava)
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(project.java_version)
+    targetCompatibility = JavaVersion.toVersion(project.java_version)
+}
